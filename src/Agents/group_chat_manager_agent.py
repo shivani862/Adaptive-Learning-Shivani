@@ -91,7 +91,13 @@ class CustomGroupChatManager(autogen.GroupChatManager):
 
 
     # TODO: Consider moving the writes to the chat panel to reactive_chat
-    def get_chat_history_and_initialize_chat(self, filename: str = None, chat_interface: pn.chat.ChatInterface = None):
+    def get_chat_history_and_initialize_chat(self, initial_message: str = None,
+                                             filename: str = None, chat_interface: pn.chat.ChatInterface = None):
+        if initial_message is None:
+            self.initial_message = "Welcome to the Adaptive Math Tutor! How can I help you today?"
+        else:
+            self.initial_message = initial_message
+
         chat_history_messages = self.get_messages_from_json(filename=filename)
         # Send the chat history to the panel interface
         if chat_history_messages:        
@@ -105,7 +111,7 @@ class CustomGroupChatManager(autogen.GroupChatManager):
                     )
             chat_interface.send("Time to continue your studies!", user="System", respond=False)
         else:
-            chat_interface.send("Welcome to the Adaptive Math Tutor! How can I help you today?", user="System", respond=False)
+            chat_interface.send(self.initial_message, user="System", respond=False)
 
  
     async def delayed_initiate_chat(self, agent, recipient, message):
