@@ -1,16 +1,29 @@
+
+from dotenv import load_dotenv
+load_dotenv()
+
 import autogen
 import panel as pn
 import openai
 import os
 import asyncio
+import logging
 import speech_recognition as sr
 from typing import List, Dict
 from src import globals
 from src.Agents.agents_telugu import *
 from src.Agents.chat_manager_fsms_telugu import FSM
 from src.Agents.group_chat_manager_agent import CustomGroupChatManager, CustomGroupChat
-from src.UI.reactive_chat import ReactiveChat
+from src.UI.reactive_chat24_telegu import ReactiveChat
 from src.UI.avatar import avatar
+
+
+
+#logging.basicConfig(filename='debug.log', level=logging.DEBUG, 
+#                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+logging.basicConfig(level=logging.INFO, 
+                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 os.environ["AUTOGEN_USE_DOCKER"] = "False"
 
