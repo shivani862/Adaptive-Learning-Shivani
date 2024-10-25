@@ -6,7 +6,8 @@ from typing import Optional, List, Dict
 import panel as pn
 from src import globals
 from src.Agents.agents import agents_dict_by_name
-from src.UI.avatar import avatar
+import src.UI.avatar as avatar
+import logging
 
 
 class CustomGroupChat(autogen.GroupChat):
@@ -91,12 +92,21 @@ class CustomGroupChatManager(autogen.GroupChatManager):
 
 
     # TODO: Consider moving the writes to the chat panel to reactive_chat
-    def get_chat_history_and_initialize_chat(self, initial_message: str = None,
-                                             filename: str = None, chat_interface: pn.chat.ChatInterface = None):
+    def get_chat_history_and_initialize_chat(self, 
+                                             initial_message: str = None,
+                                             avatars=None,
+                                             filename: str = None, 
+                                             chat_interface: pn.chat.ChatInterface = None):
         if initial_message is None:
             self.initial_message = "Welcome to the Adaptive Math Tutor! How can I help you today?"
         else:
             self.initial_message = initial_message
+
+        if avatars is None:
+            self.avatars = avatar.avatar
+        else:
+            self.avatars = avatars
+
 
         chat_history_messages = self.get_messages_from_json(filename=filename)
         # Send the chat history to the panel interface
@@ -106,7 +116,7 @@ class CustomGroupChatManager(autogen.GroupChatManager):
                     chat_interface.send(
                         message["content"],
                         user=message["role"], 
-                        avatar=avatar.get(message["role"], None),  
+                        avatar=self.avatars.get(message["role"], None),  
                         respond=False
                     )
             chat_interface.send("Time to continue your studies!", user="System", respond=False)
@@ -115,11 +125,13 @@ class CustomGroupChatManager(autogen.GroupChatManager):
 
  
     async def delayed_initiate_chat(self, agent, recipient, message):
+        logging.info("CustomGroupChatManager: delayed_initiate_chat started")
         globals.initiate_chat_task_created = True
         await asyncio.sleep(1) 
         await agent.a_initiate_chat(recipient=recipient, 
                                     clear_history = False,
                                     message=message)
+        logging.info(f"CustomGroupChatManager: agent.a_initiate_chat() with name {agent.name} completed")
 
     @property
     def chat_interface(self) ->  pn.chat.ChatInterface:

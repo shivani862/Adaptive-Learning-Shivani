@@ -157,6 +157,7 @@ for agent in groupchat.agents:
 #Load chat history on startup
 manager.get_chat_history_and_initialize_chat(
     initial_message="Welcome to the Telugu Teacher! How can I help you today?",
+    avatars=avatars,
     filename=progress_file_path, 
     chat_interface=reactive_chat.learn_tab_interface) 
 
