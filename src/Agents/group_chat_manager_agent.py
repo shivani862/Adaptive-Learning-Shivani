@@ -42,7 +42,8 @@ class CustomGroupChatManager(autogen.GroupChatManager):
             await super().a_run_chat(**kwargs)
             self.save_messages_to_json(self.filename)
         except Exception as e:
-            print(f"Exception occurred: {e}") 
+            print(f"Exception occurred: {e}")
+            raise 
 
         return True, None
             
@@ -56,7 +57,8 @@ class CustomGroupChatManager(autogen.GroupChatManager):
                 self.messages_from_json = self.messages_from_string(f.read())
                 # Strip termination message and restore chat history
                 if self.messages_from_json:
-                    if self.messages_from_json[-1].get("content","").strip()==globals.IS_TERMINATION_MSG:
+                    #if self.messages_from_json[-1].get("content","").strip()==globals.IS_TERMINATION_MSG:
+                    if self.messages_from_json[-1].get("content","")==globals.IS_TERMINATION_MSG:
                         self.messages_from_json.pop()
                     # Resume the chat from where it leaft off
                     # FIXME: Resume is not working correctly.
@@ -125,13 +127,20 @@ class CustomGroupChatManager(autogen.GroupChatManager):
 
  
     async def delayed_initiate_chat(self, agent, recipient, message):
-        logging.info("CustomGroupChatManager: delayed_initiate_chat started")
+        logging.debug("CustomGroupChatManager: delayed_initiate_chat started")
         globals.initiate_chat_task_created = True
-        await asyncio.sleep(1) 
-        await agent.a_initiate_chat(recipient=recipient, 
+        #await asyncio.sleep(1)
+        try:
+            logging.debug(f"agent={agent.name}, recipient={recipient}, message={message}") 
+            chat_result = await agent.a_initiate_chat(recipient=recipient, 
                                     clear_history = False,
                                     message=message)
-        logging.info(f"CustomGroupChatManager: agent.a_initiate_chat() with name {agent.name} completed")
+            logging.debug(f"chat_result= {chat_result}" )
+        except Exception as e:
+            logging.error(f"Exception occured while calling agent.a_initiate_chat. agent={agent}")
+            raise
+
+        logging.info(f"CustomGroupChatManager: agent.a_initiate_chat() with name {agent.name} and receiptient {recipient} completed")
 
     @property
     def chat_interface(self) ->  pn.chat.ChatInterface:

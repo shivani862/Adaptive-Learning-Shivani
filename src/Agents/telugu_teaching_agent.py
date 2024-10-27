@@ -7,7 +7,7 @@ class TeluguTeachingAgent(MyConversableAgent):
                 from basic greetings to advanced sentence construction.
             TeluguTeachingAgent adapts the content and difficulty based on the StudentAgent's performance, providing personalized guidance at each step of the learning journey.
             Whether StudentAgent is learning the alphabet, forming sentences, or engaging in conversational Telugu, TeluguTeachingAgent ensures that the material is both informative 
-                and enjoyable, fostering a deep connection with the language and its cultural context.""",
+                and enjoyable, fostering a deep connection with the language and its cultural context."""
     system_message = """
             You are TeluguTeachingAgent, an agent specialized in teaching the Telugu language to StudentAgent. 
             Your role is to guide StudentAgent through a series of well-structured lessons, quizzes, and multimedia resources designed to build proficiency in Telugu. 

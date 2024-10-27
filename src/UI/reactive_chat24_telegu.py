@@ -56,23 +56,50 @@ class ReactiveChat(param.Parameterized):
             All panel callbacks for the learn tab come through this callback function
             Because there are two chat panels, we need to save the instance
             Then, when update is called, check the instance name
-        '''                      
+        '''    
+        if isinstance(contents, tuple):
+            logging.error(f"Contents is a tuple, which is unexpected: {contents}")
+
+        logging.debug(f"Entered with contents type= {type(contents)} and Contents= {contents} and instance= {instance}")                  
         self.groupchat_manager.chat_interface = instance
         if not globals.initiate_chat_task_created:
-            asyncio.create_task(self.groupchat_manager.delayed_initiate_chat(self.agents_dict[AgentKeys.TUTOR.value], self.groupchat_manager, contents))  
+            logging.debug("calling asyncio.create_task() ")
+            try:
+                await asyncio.create_task(self.groupchat_manager.delayed_initiate_chat(self.agents_dict[AgentKeys.TUTOR.value], self.groupchat_manager, contents))  
+                logging.info("COMPLETED asyncio.create_task(groupchat_manager.delayed_initiate_chat) ")
+            except Exception as e:
+                logging.error("Exception occured while trying to create task delayed_initiate_chat")
+                raise
+            
         else:
-            if globals.input_future and not globals.input_future.done():                
+            if globals.input_future and not globals.input_future.done():
+                logging.debug("globals.input_future.done() not completed")     
+                logging.debug(f"Type of contents: {type(contents)}, Contents: {contents}")           
                 globals.input_future.set_result(contents)                 
+                logging.debug(f"Setting globals.input_future.set_results(contents) with contents = {contents}")
             else:
                 print("No input being awaited.")
     
     def update_learn_tab(self, recipient, messages, sender, config):
+        logging.debug(f"chat_interface.name = {self.groupchat_manager.chat_interface.name} and tab name= {self.LEARN_TAB_NAME} ")
         if self.groupchat_manager.chat_interface.name is not self.LEARN_TAB_NAME: return
-        last_content = messages[-1]['content'] 
-        if all(key in messages[-1] for key in ['name']):
-            self.learn_tab_interface.send(last_content, user=messages[-1]['name'], avatar=self.avatars[messages[-1]['name']], respond=False)
-        else:
-            self.learn_tab_interface.send(last_content, user=recipient.name, avatar=self.avatars[recipient.name], respond=False)
+        logging.debug(f"Called with messages=  \n {messages}")
+        last_content = messages[-1]['content']
+        try: 
+            if all(key in messages[-1] for key in ['name']):
+                logging.debug(f"learn_tab_interface.send( last_content: {last_content} \n user={messages[-1]['name']} \n avatars={self.avatars[messages[-1]['name']]}")
+                self.learn_tab_interface.send(last_content, user=messages[-1]['name'], avatar=self.avatars[messages[-1]['name']], respond=False)
+                logging.debug("learn_tab updated")
+            else:
+                logging.debug(f"learn_tab_interface.send( last_content: {last_content} \n user={recipient.name} \n avatars={self.avatars[recipient.name]}")
+                self.learn_tab_interface.send(last_content, user=recipient.name, avatar=self.avatars[recipient.name], respond=False)
+                logging.debug('learn_tab updated')
+        except Exception as e:
+            logging.exception("This is possibly due toa a bad avatars dictionary")
+            print("EXCEPTION: reactive_chat24_telugu.py update_learn_tab() writing learn_tab_interface.send() caused an exception ")
+            print("This is possibly due to a bad avatars dictionary")
+            print(e)
+            raise
         
     ########## tab2: Dashboard
     def update_dashboard(self):
@@ -80,6 +107,9 @@ class ReactiveChat(param.Parameterized):
 
     ########### tab3: Progress
     def update_progress(self, contents, user):
+        if isinstance(contents, tuple):
+            logging.error(f"Contents is a tuple, which is unexpected: {contents}")
+
         # Parse the agent's output for keywords                 
         if user == "LevelAdapterAgent":            
             pattern = re.compile(r'\b(correct|correctly|verified|yes|well done|excellent|successfully|that\'s right|good job|excellent|right|good|affirmative)\b', re.IGNORECASE)            
@@ -116,6 +146,9 @@ class ReactiveChat(param.Parameterized):
         '''
             Receive any input from the ChatInterface of the Model tab
         '''
+        if isinstance(contents, tuple):
+            logging.error(f"Contents is a tuple, which is unexpected: {contents}")
+
         self.groupchat_manager.chat_interface = instance
         if user == "System" or user == "User":
             response = self.agents_dict[AgentKeys.LEARNER_MODEL.value].last_message(agent=self.agents_dict[AgentKeys.LEARNER_MODEL.value])["content"]

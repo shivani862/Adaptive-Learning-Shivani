@@ -15,17 +15,18 @@ from src import globals as globals
 from src.Agents.group_chat_manager_agent import CustomGroupChatManager, CustomGroupChat
 from src.UI.avatar import avatar
 from enum import Enum
+#import pdb; pdb.set_trace()
+
 
 # Telugu specific
 from src.UI.reactive_chat24_telegu import ReactiveChat
 from src.FSMs.fsm_telugu import TeachMeFSM
 
-
 #logging.basicConfig(filename='debug.log', level=logging.DEBUG, 
 #                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-logging.basicConfig(level=logging.INFO, 
-                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(levelname)s - %(module)s - %(filename)s - %(funcName)s - line %(lineno)d - %(asctime)s - %(name)s - %(message)s')
 
 os.environ["AUTOGEN_USE_DOCKER"] = "False"
 
@@ -119,9 +120,9 @@ globals.input_future = None
 script_dir = os.path.dirname(os.path.abspath(__file__))
 progress_file_path = os.path.join(script_dir, '../../progress.json')
 
-logging.debug("Initializing TeachMeFSM")   
+logging.debug("panel_gui_tabs_telugu: Initializing TeachMeFSM")   
 fsm = TeachMeFSM(agents_dict)
-logging.debug("TeachMeFSM initialized")
+logging.debug("panel_gui_tabs_telugu: TeachMeFSM initialized")
 
 groupchat = CustomGroupChat(agents=list(agents_dict.values()), 
                               messages=[],
@@ -132,12 +133,12 @@ groupchat = CustomGroupChat(agents=list(agents_dict.values()),
 
 
 manager = CustomGroupChatManager(groupchat=groupchat,
-                                filename=progress_file_path, 
-                                is_termination_msg=lambda x: x.get("content", "").rstrip().find("TERMINATE") >= 0 )    
+                                filename=progress_file_path)
+                                  
 
 # Allow the fsm to get the groupchat history
 fsm.register_groupchat_manager(manager)
-logging.debug("fsm registered groupchat_manager")
+logging.debug("panel_gui_tabs_telugu: fsm registered groupchat_manager")
 
 # Begin GUI components
 reactive_chat = ReactiveChat(agents_dict=agents_dict, avatars=avatars, 
@@ -161,8 +162,10 @@ manager.get_chat_history_and_initialize_chat(
     filename=progress_file_path, 
     chat_interface=reactive_chat.learn_tab_interface) 
 
-reactive_chat.update_dashboard()    #Call after history loaded
+logging.info("panel_gui_tabs_telugu: manager.get_chat_history_and_initialize_chat completed")
 
+reactive_chat.update_dashboard()    #Call after history loaded
+logging.info("panel_gui_tabs_telugu: reactive_chat.update_dashboard() completed")
 
 
 # --- Panel Interface ---
@@ -171,5 +174,8 @@ def create_app():
 
 if __name__ == "__main__":    
     app = create_app()
-    #pn.serve(app, debug=True)
-    pn.serve(app, callback_exception='verbose')
+    try:
+        pn.serve(app, callback_exception='verbose')
+    except Exception as e:
+        logging.exception(f"EXCEPTION in main {e}")
+        raise

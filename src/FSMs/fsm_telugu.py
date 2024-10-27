@@ -395,9 +395,9 @@ class TeachMeFSM:
 
         # Try to advance the state machine
         try:
-            logging.debug(f"next_speaker_selector(): advance called. last_speaker= '{self.last_speaker}'")
+            logging.info(f"next_speaker_selector(): advance called. last_speaker= '{self.last_speaker}'")
             self.advance()
-            logging.debug(f"next_speaker_selector(): advance FINISHED. next_speaker= '{self.next_agent}'")
+            logging.info(f"next_speaker_selector(): advance FINISHED. next_speaker= '{self.next_agent}'")
         except MachineError as e:
             # Handle invalid transitions
             logging.warning(f"Invalid transition attempted: {e}")
