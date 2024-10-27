@@ -65,7 +65,8 @@ class ReactiveChat(param.Parameterized):
         if not globals.initiate_chat_task_created:
             logging.debug("calling asyncio.create_task() ")
             try:
-                await asyncio.create_task(self.groupchat_manager.delayed_initiate_chat(self.agents_dict[AgentKeys.TUTOR.value], self.groupchat_manager, contents))  
+                #Do not use await here or it will lock the panel tab and not allow further student input
+                asyncio.create_task(self.groupchat_manager.delayed_initiate_chat(self.agents_dict[AgentKeys.TUTOR.value], self.groupchat_manager, contents))  
                 logging.info("COMPLETED asyncio.create_task(groupchat_manager.delayed_initiate_chat) ")
             except Exception as e:
                 logging.error("Exception occured while trying to create task delayed_initiate_chat")

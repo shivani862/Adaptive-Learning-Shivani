@@ -41,14 +41,12 @@ exit_callbacks = {
 }
 
 class TeachMeFSM:
-    def __init__(self, agents, AgentKeys=agents.AgentKeys, max_code_execution_attempts=3):
+    def __init__(self, agents, AgentKeys=agents.AgentKeys):
         logging.debug("Initializing Telugu TeachMeFSM")
         self.agents = agents
         self.AgentKeys = AgentKeys
-        self.max_code_execution_attempts = max_code_execution_attempts
         self.last_speaker = None
         self.next_agent = None
-        self.run_attempts = 0  # Counter for code running attempts
         self.current_state_enum = FSMStates.AWAITING_TOPIC
         self.previous_state_enum = None
 
@@ -129,13 +127,13 @@ class TeachMeFSM:
 
         # Transitions from 'motivating' state with conditions
         # TODO: Consider whether to only go to the teacher if level increases
-        self.machine.add_transition(
-            trigger='advance',
-            source=FSMStates.MOTIVATING.value,
-            dest=FSMStates.AWAITING_PROBLEM.value,
-            unless='adapter_agent_says_increase_difficulty',
-            after='set_problem_generator'
-        )
+        # self.machine.add_transition(
+        #     trigger='advance',
+        #     source=FSMStates.MOTIVATING.value,
+        #     dest=FSMStates.AWAITING_PROBLEM.value,
+        #     unless='adapter_agent_says_increase_difficulty',
+        #     after='set_problem_generator'
+        # )
 
         self.machine.add_transition(
             trigger='advance',
@@ -200,31 +198,6 @@ class TeachMeFSM:
             logging.debug(f"set_solution_verifier(): Next agent set to 'solution_verifier'")
         except KeyError as e:
             logging.error(f"Agent not found: {e}")
-        self.on_enter_state()
-
-    def set_programmer(self):
-        try:
-            self.next_agent = self.agents[self.AgentKeys.PROGRAMMER.value]
-            logging.debug(f"set_programmer(): Next agent set to 'programmer'")
-        except KeyError as e:
-            logging.error(f"Agent not found: {e}")
-        self.on_enter_state()
-
-    def set_code_runner(self):
-        try:
-            self.next_agent = self.agents[self.AgentKeys.CODE_RUNNER.value]
-            logging.debug(f"set_code_runner(): Next agent set to 'code_runner'")
-        except KeyError as e:
-            logging.error(f"Agent not found: {e}")
-        self.on_enter_state()
-
-    def set_code_runner_verifier(self):
-        try:
-            self.next_agent = self.agents[self.AgentKeys.CODE_RUNNER_VERIFIER.value]
-            logging.debug(f"set_code_runner_verifier(): Next agent set to 'code_runner_verifier'")
-        except KeyError as e:
-            logging.error(f"Agent not found: {e}")
-            self.next_agent = None   # DEBUG
         self.on_enter_state()
 
     def set_learner_model(self):
