@@ -1,5 +1,5 @@
 from src.Agents.agents import *
-from src.Agents.agents_telugu import telugu_teaching_agent
+from Agents.telugu_agents import telugu_teaching_agent
 avatar = {
     student.name: "✏️",                 # Pencil
     knowledge_tracer.name: "🧠",       # Brain

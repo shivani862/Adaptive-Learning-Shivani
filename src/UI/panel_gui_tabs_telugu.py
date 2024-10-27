@@ -25,7 +25,7 @@ from src.FSMs.fsm_telugu import TeachMeFSM
 #logging.basicConfig(filename='debug.log', level=logging.DEBUG, 
 #                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(levelname)s - %(module)s - %(filename)s - %(funcName)s - line %(lineno)d - %(asctime)s - %(name)s - %(message)s')
 
 os.environ["AUTOGEN_USE_DOCKER"] = "False"
@@ -63,13 +63,17 @@ llm = gpt4_config
 # Define Agents
 #################################################
 from src.Agents.student_agent import StudentAgent
-from src.Agents.telugu_teaching_agent import TeluguTeachingAgent
 from src.Agents.tutor_agent import TutorAgent
-from src.Agents.problem_generator_agent import ProblemGeneratorAgent
 from src.Agents.solution_verifier_agent import SolutionVerifierAgent
 from src.Agents.learner_model_agent import LearnerModelAgent
 from src.Agents.level_adapter_agent import LevelAdapterAgent
 from src.Agents.motivator_agent import MotivatorAgent
+
+# Telugu specific
+from src.Agents.telugu_teaching_agent import TeluguTeachingAgent
+from Agents.telugu_problem_generator_agent import ProblemGeneratorAgent
+
+
 
 class AgentKeys(Enum):
     TEACHER = 'teacher'

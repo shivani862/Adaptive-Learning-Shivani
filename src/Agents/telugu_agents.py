@@ -6,7 +6,7 @@ from .student_agent import StudentAgent
 from .knowledge_tracer_agent import KnowledgeTracerAgent
 from .teacher_agent import TeacherAgent
 from .tutor_agent import TutorAgent
-from .problem_generator_telugu_agent import ProblemGeneratorAgent
+from .telugu_problem_generator_agent import ProblemGeneratorAgent
 from .solution_verifier_agent import SolutionVerifierAgent
 from .programmer_agent import ProgrammerAgent
 from .code_runner_agent import CodeRunnerAgent
