@@ -67,7 +67,7 @@ class MyConversableAgent(autogen.ConversableAgent, MyBaseAgent):
         await super().a_receive(message, sender, request_reply, silent)
 
         # Check for the termination string
-        logging.info(f"************* message *************** Receiver: \{message} \n {self.name}")
+        logging.debug(f"In check for termination string: agent/receiver= {self.name}. agent/sender= {sender.name}. message={message}")
         if isinstance(message, str):
             message = {"content": message}
             logging.info(f"a_receive() message {message}" )

@@ -2,7 +2,7 @@ import logging
 from transitions import Machine
 from transitions.core import MachineError
 from enum import Enum
-import src.Agents.agents as agents
+import src.Agents.telugu_agents as agents
 
 
 #######################################################
@@ -14,9 +14,6 @@ class FSMStates(Enum):
     AWAITING_PROBLEM = 'awaiting_problem'
     AWAITING_ANSWER = 'awaiting_answer'
     VERIFYING_ANSWER = 'verifying_answer'
-    # WRITING_PROGRAM = 'writing_program'
-    # RUNNING_CODE = 'running_code'
-    # VERIFYING_CODE = 'verifying_code'  
     UPDATING_MODEL = 'updating_model'
     ADAPTING_LEVEL = 'adapting_level'
     MOTIVATING = 'motivating'
@@ -25,7 +22,7 @@ class FSMStates(Enum):
 
 
 def on_enter_updating_model():
-    logging.info("Entering state UPDATING_MODEL")
+    logging.debug("Entering state UPDATING_MODEL")
     # Add any specific initialization logic here
 
 
@@ -36,7 +33,7 @@ entry_callbacks = {
 
 
 def on_exit_verifying_answer():
-    logging.info("Exiting state VERIFYING_ANSWER")
+    logging.debug("Exiting state VERIFYING_ANSWER")
 
 exit_callbacks = {
     FSMStates.VERIFYING_ANSWER: on_exit_verifying_answer,
@@ -45,7 +42,7 @@ exit_callbacks = {
 
 class TeachMeFSM:
     def __init__(self, agents, AgentKeys=agents.AgentKeys, max_code_execution_attempts=3):
-        logging.info("Initializing Telugu TeachMeFSM")
+        logging.debug("Initializing Telugu TeachMeFSM")
         self.agents = agents
         self.AgentKeys = AgentKeys
         self.max_code_execution_attempts = max_code_execution_attempts
@@ -57,10 +54,10 @@ class TeachMeFSM:
 
         # Define states
         states = [state.value for state in FSMStates]
-        logging.info("TeachMeFSM: states defined")
+        logging.debug("TeachMeFSM: states defined")
 
         self.machine = Machine(model=self, states=states, initial=FSMStates.AWAITING_TOPIC.value)
-        logging.info("TeachMeFSM: Machine() created")
+        logging.debug("TeachMeFSM: Machine() created")
 
         # Add states with entry and exit callbacks
         # Add states with entry and exit callbacks
@@ -73,7 +70,7 @@ class TeachMeFSM:
                                    on_enter=entry_callbacks.get(state, None), 
                                    on_exit=exit_callbacks.get(state, None))
 
-            logging.info(f"TeachMeFSM: state {state_name} defined")   
+            logging.debug(f"TeachMeFSM: state {state_name} defined")   
        
 
         #####################################################
@@ -115,42 +112,6 @@ class TeachMeFSM:
             after='set_learner_model'
         )
 
-        # self.machine.add_transition(
-        #     trigger='advance',
-        #     source=FSMStates.WRITING_PROGRAM.value,
-        #     dest=FSMStates.RUNNING_CODE.value,
-        #     after='set_code_runner'
-        # )
-
-        # # Transition from RUNNING_CODE to VERIFYING_CODE
-        # self.machine.add_transition(
-        #     trigger='advance',
-        #     source=FSMStates.RUNNING_CODE.value,
-        #     dest=FSMStates.VERIFYING_CODE.value,
-        #     after='set_code_runner_verifier'
-        # )
-
- 
-        # # Transition from VERIFYING_CODE to WRITING_PROGRAM if code does not execute
-        # self.machine.add_transition(
-        #     trigger='advance',
-        #     source=FSMStates.VERIFYING_CODE.value,
-        #     dest=FSMStates.WRITING_PROGRAM.value,  
-        #     unless='code_is_correct',
-        #     after='increment_attempts_and_set_programmer'
-        # )
-
-       # Transition from VERIFYING_CODE to UPDATING_MODEL if too many attempts to execute code fail
-            # This is a punt because it means the LLM did not generate runnable python code
-       # Transition from VERIFYING_CODE to UPDATING_MODEL if code executes and is correct
-        # self.machine.add_transition(
-        #     trigger='advance',
-        #     source=FSMStates.VERIFYING_CODE.value,
-        #     dest=FSMStates.UPDATING_MODEL.value,
-        #     conditions='code_is_correct_or_too_many_execution_attempts',
-        #     after='set_learner_model'
-        # )
-
  
         self.machine.add_transition(
             trigger='advance',
@@ -184,7 +145,7 @@ class TeachMeFSM:
             after='set_teacher'
         )
 
-        logging.info("TeachMeFSM: transitions added")
+        logging.debug("TeachMeFSM: transitions added")
         logging.info("TeachMeFSM initialized")
 
 
@@ -192,7 +153,7 @@ class TeachMeFSM:
     def on_enter_state(self):
         self.previous_state_enum = self.current_state_enum
         self.current_state_enum = FSMStates(self.state)
-        logging.info(f"Transitioning to state '{self.current_state_enum.name}'")
+        logging.debug(f"Transitioning to state '{self.current_state_enum.name}'")
         if self.previous_state_enum:
             logging.info(f"Transitioned from '{self.previous_state_enum.name}' to '{self.current_state_enum.name}'")
         else:
@@ -290,84 +251,7 @@ class TeachMeFSM:
         except KeyError as e:
             logging.error(f"Agent not found: {e}")
         self.on_enter_state()
-
-
-    # # Outputs for managing attempts
-    # def increment_attempts_and_set_programmer(self):
-    #     self.run_attempts += 1
-    #     logging.info(f"increment_attempts(): Run attempts incremented to {self.run_attempts}")
-    #     self.set_programmer()
-
-    # def too_many_code_execution_attempts(self):
-    #     if self.run_attempts > self.max_code_execution_attempts: 
-    #         logging.info("too_many_code_execution_attempts. Punting and moving to learner model")
-    #         return True
-    #     return False
-
-    # def reset_attempts(self):
-    #     self.run_attempts = 0
-    #     logging.info("reset_attempts(): Run attempts reset to 0")
-
-    # Conditions
-    # def code_is_correct(self):
-    #     """
-    #     Check if the code run was successful by analyzing the groupchat_manager messages.
-    #     """
-    #     # Get all message history from the groupchat manager
-    #     all_messages = self.groupchat_manager.groupchat.get_messages()
-        
-    #     # Get the latest message from the groupchat manager to ensure accuracy
-    #     if all_messages:
-    #         last_message = all_messages[-1]
-    #         logging.info(f"Evaluating message from sender '{last_message['name']}': {last_message['content']}")
-    #         if last_message['name'] == 'CodeRunnerAgent' and 'exitcode: 0' in last_message['content']:
-    #             logging.info("Code run succeeded with exit code 0.")
-    #             return True
-
-    #     # If no successful message is found, return False
-    #     logging.info("Code run did not succeed.")
-    #     return False
-    
- 
-    # def code_is_correct(self):
-    #     """
-    #     Check if the code run was successful by analyzing the groupchat_manager messages.
-    #     """
-    #     if not hasattr(self, 'groupchat_manager') or not self.groupchat_manager:
-    #         logging.error("Groupchat manager not registered or is None.")
-            
-    #     # Get all message history from the groupchat manager
-    #     all_messages = self.groupchat_manager.groupchat.get_messages()
-        
-    #     # Get the latest message from the groupchat manager to ensure accuracy
-    #     if all_messages:
-    #         last_message = all_messages[-1]
-    #         logging.info(f"Evaluating message from sender '{last_message['name']}': {last_message['content']}")
-    #         if ( "code executed successfully" in last_message['content']):
-    #             logging.info("Code run succeeded with exit code 0.")
-    #             return True
-
-    #     # If no successful message is found, return False
-    #     logging.info("Code run did NOT succeed.")
-    #     return False
-
- 
- 
-    # def code_is_correct_or_too_many_execution_attempts(self):
-    #     """
-    #     Check if the code run was successful by analyzing the groupchat_manager messages.
-    #     """
-    #     if self.too_many_code_execution_attempts():
-    #         self.reset_attempts()
-    #         return True
-
-    #     if self.code_is_correct():
-    #         return True
-
-    #     return False       
-  
-    # def code_is_not_correct(self):
-    #     return not self.code_is_correct()
+   
  
     def adapter_agent_says_increase_difficulty(self):
         last_level_adapter_message = None
@@ -395,9 +279,8 @@ class TeachMeFSM:
 
         # Try to advance the state machine
         try:
-            logging.info(f"next_speaker_selector(): advance called. last_speaker= '{self.last_speaker}'")
             self.advance()
-            logging.info(f"next_speaker_selector(): advance FINISHED. next_speaker= '{self.next_agent}'")
+            logging.info(f"next_speaker_selector(): advance FINISHED. last_speaker= {self.last_speaker.name}. next_speaker= {self.next_agent.name}")
         except MachineError as e:
             # Handle invalid transitions
             logging.warning(f"Invalid transition attempted: {e}")
